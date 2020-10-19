@@ -12,6 +12,7 @@ let config = {
   // baseURL: process.env.baseURL || process.env.apiUrl || ""
   // timeout: 60 * 1000, // Timeout
   // withCredentials: true, // Check cross-site Access-Control
+  baseURL:'http://127.0.0.1:8888/api/private/v1/'
 };
 
 const _axios = axios.create(config);
@@ -19,6 +20,8 @@ const _axios = axios.create(config);
 _axios.interceptors.request.use(
   function(config) {
     // Do something before request is sent
+    config.headers.Authorization=window.sessionStorage.getItem('token')
+
     return config;
   },
   function(error) {
@@ -31,7 +34,7 @@ _axios.interceptors.request.use(
 _axios.interceptors.response.use(
   function(response) {
     // Do something with response data
-    return response;
+    return response.data;
   },
   function(error) {
     // Do something with response error
@@ -46,7 +49,8 @@ Plugin.install = function(Vue, options) {
     axios: {
       get() {
         return _axios;
-      }
+      },
+
     },
     $axios: {
       get() {
