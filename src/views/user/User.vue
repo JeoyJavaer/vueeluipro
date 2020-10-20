@@ -13,22 +13,24 @@
             <el-input
                 placeholder="用户名"
                 v-model="query"
-                clearable></el-input>
+                clearable
+                @change="inputSearch"
+            ></el-input>
 
           </el-col>
           <el-col :span="8">
             <el-button type="primary" icon="el-icon-circle-plus-outline" @click="addUserClick">添加</el-button>
           </el-col>
           <el-dialog
-              title="添加用户"
+              :title="showpassword?'添加用户':'修改用户信息'"
               :visible.sync="addDialogVisible"
               width="60%">
 
             <el-form :model="userinfo" :rules="addUserRule" ref="addUserForm" label-width="100px">
-              <el-form-item label="用户名" prop="username">
+              <el-form-item label="用户名" prop="username" v-if="showpassword">
                 <el-input v-model="userinfo.username"></el-input>
               </el-form-item>
-              <el-form-item label="密码" prop="password">
+              <el-form-item label="密码" prop="password" v-if="showpassword">
                 <el-input v-model="userinfo.password" type="password"></el-input>
               </el-form-item>
               <el-form-item label="邮箱" prop="email">
@@ -103,6 +105,16 @@
 
 
     </div>
+    <el-dialog
+        title="确定要删除用户吗？"
+        :visible.sync="delDialogVisible"
+        width="60%" :before-close="delDialogCancel">
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="delDialogCancel">取 消</el-button>
+    <el-button type="primary" @click="submitDelUser">确 定</el-button>
+    </span>
+    </el-dialog>
+
 
   </el-card>
 </template>
@@ -116,12 +128,17 @@ export default {
       pagenum: 1,
       pagesize: 2,
       addDialogVisible: false,
+      delDialogVisible:false,
+
       userinfo: {
+        id: '',
         username: '',
         password: '',
         email: '',
         mobile: ''
       },
+
+      showpassword: true,//控制弹窗是用于新添加用户还是修改用户信息中的，是否显示密码
       addUserRule: {
         username: [
           {required: true, message: '请输入用户名', trigger: 'blur'},
@@ -132,7 +149,7 @@ export default {
           {min: 4, max: 7, message: '长度在 4 到 7 个字符', trigger: 'blur'}
         ], email: [
           {required: true, message: '请输入邮箱', trigger: 'blur'},
-          {min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur'}
+          {min: 3, max: 25, message: '长度在 3 到 25 个字符', trigger: 'blur'}
         ],
         mobile: [
           {required: true, message: '请输入手机号', trigger: 'blur'},
@@ -169,25 +186,51 @@ export default {
     },
 
     addUserClick() {
+      this.userinfo.username = ''
+      this.userinfo.password = ''
+      this.userinfo.email = ''
+      this.userinfo.mobile = ''
       this.addDialogVisible = true
+      this.showpassword = true
+      // this.$refs.addUserForm.resetFields()
     },
 
     submitAddUser() {
       this.$refs.addUserForm.validate((valid) => {
         if (valid) {// 校验通过，提交数据
-          this.$axios.post('/users', this.userinfo).then((res) => {
-            if (res.meta.status === 201) {
-              //创建成功
-              this.$message.success("添加成功")
-              this.getUserList()//刷新数据
-              //服务器返回成功，则清除表单数据，并设置为隐藏
-              this.cancelAddUser()
-            } else {
-              //返回错误则提示错误信息
-              this.$message.error(res.meta.msg)
-            }
-            console.log(res.data);
-          })
+          if (this.showpassword) {  //添加用户
+            this.$axios.post('/users', this.userinfo).then((res) => {
+              if (res.meta.status === 201) {
+                //创建成功
+                this.$message.success("添加成功")
+                this.getUserList()//刷新数据
+                //服务器返回成功，则清除表单数据，并设置为隐藏
+                this.cancelAddUser()
+              } else {
+                //返回错误则提示错误信息
+                this.$message.error(res.meta.msg)
+              }
+              // console.log(res.data);
+            })
+          } else { //修改用户
+            this.$axios.put('/users/' + this.userinfo.id, {
+              email: this.userinfo.email,
+              mobile: this.userinfo.mobile
+            }).then((res) => {
+              if (res.meta.status === 200) {
+                //创建成功
+                this.$message.success("修改成功")
+                this.getUserList()//刷新数据
+                //服务器返回成功，则清除表单数据，并设置为隐藏
+                this.cancelAddUser()
+              } else {
+                //返回错误则提示错误信息
+                this.$message.error(res.meta.msg)
+              }
+            })
+
+          }
+
         }
       })
     },
@@ -199,23 +242,60 @@ export default {
 
     editClick(index, data) {
       //编辑用户
-      console.log(data);
+      this.setUserInfo(data)
+      this.showpassword = false
       this.userItem = data
+      this.addDialogVisible = true
     },
 
     deleteClick(index, data) {
       //删除用户
+      this.delDialogVisible = true;
+      this.setUserInfo(data)
+    },
+
+    cleanUserInfo() {
+      this.userinfo.username = ''
+      this.userinfo.password = ''
+      this.userinfo.email = ''
+      this.userinfo.mobile = ''
+      this.userinfo.id = ''
+    },
+
+    setUserInfo(data) {
+      this.userinfo.username = data.username
+      this.userinfo.email = data.email
+      this.userinfo.mobile = data.mobile
+      this.userinfo.id = data.id
+      this.userinfo.password = data.password
+    },
+
+    delDialogCancel() {
+      this.delDialogVisible = false
+      this.cleanUserInfo()
+    },
+
+    submitDelUser(){
+      this.$axios.delete('/users/'+this.userinfo.id).then((res)=>{
+        if (res.meta.status===200){
+          this.$message.success(res.meta.msg)
+          this.getUserList()
+            this.delDialogVisible=false
+        }else {
+          this.$message.error(res.meta.msg)
+        }
+      })
     },
 
     userStateChange(index, data) {
       console.log(data);
-      //TODO  修改用户状态
-      let idStr = Number(data.id)
-      this.$axios.put('/users', {
-          uId:idStr,
-          type:data.mg_state
-      }).then((res) => {
-        console.log(res);
+      this.$axios.put('/users/' + data.id + '/state/' + data.mg_state).then((res) => {
+        if (res.meta.status === 200) {
+          this.$message.success("修改状态成功")
+        } else {
+          this.$message.error(res.meta.msg)
+          //修改失败，状态返回
+        }
       })
     },
 
@@ -228,6 +308,11 @@ export default {
     handleCurrentChange(pagenum) {// 当前第几页发生变化
       console.log(pagenum);
       this.pagenum = pagenum
+      this.getUserList()
+    },
+
+    inputSearch(value) {
+      this.query = value
       this.getUserList()
     }
   }
