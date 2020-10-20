@@ -42,7 +42,6 @@ export default {
         ]
       },
 
-      data: {}
     }
   },
 
@@ -57,11 +56,10 @@ export default {
 
           this.$axios.post('/login', this.user).then((res) => {
             console.log('res' + res);
-
-            this.data=res
             if (res.meta.status === 200) {
               window.sessionStorage.setItem('token', res.data.token);
               this.$message.success('登录成功');
+              this.$store.state.username=res.data.username
               this.$router.push('/home')
             } else {
               this.$message('登录失败');

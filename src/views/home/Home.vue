@@ -1,12 +1,12 @@
 <template>
   <div class="home">
     <el-container>
-      <el-header>
+      <el-header class="home-header">
         <span home-div>后台管理系统</span>
         <img src="~assets/logo.png" alt="">
         <el-button type="info" @click="logout" class="logout-btn">退出登录</el-button>
       </el-header>
-      <el-container>
+      <el-container class="home-nav">
         <el-aside :width="isCollapse? '64px':'200px'">
           <div class="collapse-btn" @click="collapseMenu">| | |</div>
           <el-menu
@@ -35,7 +35,7 @@
 
         </el-aside>
 
-        <el-main>
+        <el-main class="content">
           <router-view></router-view>
         </el-main>
 
@@ -53,11 +53,11 @@ export default {
       isCollapse: false,
       menuList: [],
       iconList: {
-        '125': 'iconfont icon-user',
-        '103': 'iconfont icon-tijikongjian',
-        '101': 'iconfont icon-shangpin',
-        '102': 'iconfont icon-danju',
-        '145': 'iconfont icon-baobiao'
+        '125': 'el-icon-s-custom',
+        '103': 'el-icon-s-cooperation',
+        '101': 'el-icon-s-goods',
+        '102': 'el-icon-shopping-cart-1',
+        '145': 'el-icon-s-marketing'
       },
       activePath: ''
     }
@@ -100,8 +100,8 @@ export default {
 <style scoped>
 .home {
   background: #55585e;
-  height: 100%;
-  width: 100%;
+  padding: 10px;
+  height: 80%;
 }
 
 .el-menu {
@@ -126,10 +126,6 @@ export default {
   text-align: center;
 }
 
-.el-container {
-  height: 100%;
-}
-
 .collapse-btn {
   background-color: #4A5064;
   font-size: 10px;
@@ -139,5 +135,28 @@ export default {
   letter-spacing: 0.2em;
   cursor: pointer;
 }
+
+
+.home-header{
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 60px;
+  background: #3e4653;
+
+}
+
+.home-nav{
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 20px;
+}
+
+
 
 </style>
