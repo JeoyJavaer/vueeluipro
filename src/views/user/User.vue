@@ -70,7 +70,7 @@
           <el-table-column label="可用">
             <template slot-scope="scope">
               <el-switch
-                  v-model="scope.row.mg_state"  @change="userStateChange(scope.$index,scope.row)">
+                  v-model="scope.row.mg_state" @change="userStateChange(scope.$index,scope.row)">
               </el-switch>
             </template>
           </el-table-column>
@@ -141,7 +141,7 @@ export default {
       },
       users: [],
       userItem: {},
-      totalItem:0
+      totalItem: 0
     }
   },
 
@@ -162,8 +162,8 @@ export default {
       }).then((res) => {
         console.log('user:' + res.data);
         this.users = res.data.users
-        this.totalItem=res.data.total
-        this.pagenum=res.data.pagenum
+        this.totalItem = res.data.total
+        this.pagenum = res.data.pagenum
 
       })
     },
@@ -173,14 +173,21 @@ export default {
     },
 
     submitAddUser() {
-      this.$refs.addUserForm.validate((valide) => {
-        if (valide) {// 校验通过，提交数据
-
-
-          //服务器返回成功，则清除表单数据，并设置为隐藏
-
-          //返回错误则提示错误信息
-
+      this.$refs.addUserForm.validate((valid) => {
+        if (valid) {// 校验通过，提交数据
+          this.$axios.post('/users', this.userinfo).then((res) => {
+            if (res.meta.status === 201) {
+              //创建成功
+              this.$message.success("添加成功")
+              this.getUserList()//刷新数据
+              //服务器返回成功，则清除表单数据，并设置为隐藏
+              this.cancelAddUser()
+            } else {
+              //返回错误则提示错误信息
+              this.$message.error(res.meta.msg)
+            }
+            console.log(res.data);
+          })
         }
       })
     },
@@ -200,19 +207,27 @@ export default {
       //删除用户
     },
 
-    userStateChange(index, data){
+    userStateChange(index, data) {
+      console.log(data);
       //TODO  修改用户状态
+      let idStr = Number(data.id)
+      this.$axios.put('/users', {
+          uId:idStr,
+          type:data.mg_state
+      }).then((res) => {
+        console.log(res);
+      })
     },
 
-    handleSizeChange(pagesize){//每页的数目发生变化
+    handleSizeChange(pagesize) {//每页的数目发生变化
       console.log(pagesize);
-      this.pagesize=pagesize
+      this.pagesize = pagesize
       this.getUserList()
     },
 
-    handleCurrentChange(pagenum){// 当前第几页发生变化
+    handleCurrentChange(pagenum) {// 当前第几页发生变化
       console.log(pagenum);
-      this.pagenum=pagenum
+      this.pagenum = pagenum
       this.getUserList()
     }
   }
@@ -246,7 +261,7 @@ export default {
   margin-top: 15px;
 }
 
-.user-list-pagination{
+.user-list-pagination {
   margin-top: 15px;
 }
 </style>
