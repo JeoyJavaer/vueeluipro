@@ -95,7 +95,8 @@
 
       <zk-table
           ref="table"
-          sum-text="sum"
+          selection-type
+          :show-header="false"
           index-text="#"
           :data="allocateList"
           :props="treeProps"
@@ -103,7 +104,7 @@
           :columns="columns"
           :is-fold="false"
           :expand-type="true"
-          :selection-type="true">
+          >
         <template slot="$expand" slot-scope="scope">
           {{
             `My name is ${scope.row.name},
@@ -159,6 +160,13 @@ export default {
       },
       columns: [
         {
+          label: 'authName',
+          children: 'children'
+        },
+        {
+          label: 'authName',
+          children: 'children'
+        }, {
           label: 'authName',
           children: 'children'
         }
