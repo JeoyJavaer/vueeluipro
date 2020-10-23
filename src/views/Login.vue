@@ -1,17 +1,40 @@
 <template>
-  <div>
-    <div class="login-container">
-      <h2 class="login-title">统计系统</h2>
-      <el-form ref="loginForm" :model="user" :rules="rules" class="login-form" label-width="0px">
-        <el-form-item prop="username">
-          <el-input v-model="user.username" placeholder="用户名" prefix-icon="el-icon-user-solid"></el-input>
+  <div class="login">
+    <div class="loginBox">
+      <h2>爱逛街后台管理系统</h2>
+      <el-form
+          :model="user"
+          :rules="rules"
+          ref="loginForm"
+          label-width="0px">
+        <el-form-item
+            label=""
+            prop="username"
+            style="margin-top:40px;">
+
+          <el-input
+              class="inps"
+              placeholder='用户名'
+              v-model="user.username"
+              prefix-icon="el-icon-user-solid"
+          ></el-input>
+
         </el-form-item>
-        <el-form-item prop="password">
-          <el-input v-model='user.password' placeholder="密码" prefix-icon="el-icon-lock" type="password"></el-input>
+        <el-form-item
+            label=""
+            prop="passWord">
+
+          <el-input
+              class="inps"
+              placeholder='密码'
+              type="password"
+              v-model="user.password"
+              prefix-icon="el-icon-lock"
+          ></el-input>
         </el-form-item>
-        <el-form-item>
-          <el-button @click="login" type="primary">登录</el-button>
-          <el-button @click="resetUser" type="info">清空</el-button>
+        <el-form-item style="margin-top:55px;">
+          <el-button type="primary" round class="submitBtn" @click="login">登录</el-button>
+          <el-button type="info" round class="resetBtn" @click="resetUser">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -19,15 +42,13 @@
 </template>
 
 <script>
-
-
 export default {
-  name: "Login",
   data() {
     return {
+
       user: {
-        username: '',
-        password: ''
+        username: 'admin',
+        password: '123456'
       },
       token: '',
 
@@ -41,11 +62,10 @@ export default {
           {min: 4, max: 7, message: '长度在 5 到 7 个字符', trigger: 'blur'}
         ]
       },
-
-    }
+    };
   },
-
   methods: {
+    //提交登录
     resetUser() {
       this.$refs.loginForm.resetFields()
     },
@@ -59,7 +79,7 @@ export default {
             if (res.meta.status === 200) {
               window.sessionStorage.setItem('token', res.data.token);
               this.$message.success('登录成功');
-              this.$store.state.username=res.data.username
+              this.$store.state.username = res.data.username
               this.$router.push('/home')
             } else {
               this.$message('登录失败');
@@ -73,31 +93,73 @@ export default {
           this.$message('登录失败');
         }
       })
-    }
+    },
   }
-}
+};
 </script>
 
-<style scoped>
-.login-container {
-  /*margin: 0 auto;*/
-  justify-content: center;
-  width: 700px;
-  height: 500px;
-  margin: 80px;
-  background: darkseagreen;
+<style  scoped>
+.el-form-item__content {
+  line-height: 50px;
+  position: relative;
+  font-size: 34px;
 }
 
-.login-form {
+.login {
+  width: 100vw;
+  padding: 0;
+  margin: 0;
+  height: 100vh;
+  font-size: 16px;
+  color: #fff;
+  font-family: "Source Sans Pro";
+  background-size: 100%;
+  background:url("~assets/login.png") no-repeat;
+  position: relative;
+}
+
+.loginBox {
+  width: 380px;
+  height: 480px;
+  position: absolute;
+  top: 0;
+  left: 30%;
+  right: 0;
+  bottom: 0;
   margin: auto;
+  padding: 50px 40px 40px 40px;
+  box-shadow: -15px 15px 15px rgba(6, 17, 47, 0.7);
+  opacity: 1;
+  background: linear-gradient(230deg,
+  rgba(53, 57, 74, 0) 0%,
+  rgb(0, 0, 0) 100%);
 }
 
-.login-title {
-  font-size: 22px;
-  margin-bottom: 10px;
-  line-height: 30px;
-  padding: 10px;
-  color: #a0a2a5;
-  border-bottom: 1px solid #3e4653;
+/deep/ .inps input {
+  border: none;
+  color: #fff;
+  background-color: transparent;
+  font-size: 12px;
 }
+
+
+.iconfont {
+  color: #fff;
+}
+
+
+.resetBtn {
+  background-color: transparent;
+  color: #ff5777;
+  width: 100px;
+  flex: 1;
+}
+
+.submitBtn {
+  background-color: transparent;
+  color: #39f;
+  width: 100px;
+  flex: 1;
+}
+
 </style>

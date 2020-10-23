@@ -14,4 +14,7 @@ export default {
 
 <style>
 @import "assets/css/base.css";
+#app{
+
+}
 </style>

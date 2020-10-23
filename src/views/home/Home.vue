@@ -2,16 +2,20 @@
   <div class="home">
     <el-container>
       <el-header class="home-header">
-        <span home-div>后台管理系统</span>
         <img src="~assets/logo.png" alt="">
-        <el-button type="info" @click="logout" class="logout-btn">退出登录</el-button>
+        <div class="home-div">
+          <span>爱逛街后台管理系统</span>
+        </div>
+        <div class="logout-btn">
+          <el-button type="info" @click="logout" class="logout-btn">退出登录</el-button>
+        </div>
       </el-header>
       <el-container class="home-nav">
-        <el-aside :width="isCollapse? '64px':'200px'">
+        <el-aside :width="isCollapse? '64px':'200px'" class="home-aside">
           <div class="collapse-btn" @click="collapseMenu">| | |</div>
           <el-menu
               :default-active="activePath"
-              background-color="#545c64"
+              background-color="#3e4653"
               text-color="#fff"
               :unique-opened="true"
               :collapse="isCollapse"
@@ -100,8 +104,8 @@ export default {
 <style scoped>
 .home {
   background: #55585e;
-  padding: 10px;
-  height: 80%;
+  /*height: 80%;*/
+
 }
 
 .el-menu {
@@ -111,7 +115,8 @@ export default {
 .el-header {
   display: flex;
   float: left;
-  padding: 10px;
+  padding: 0px;
+  /*padding: 10px;*/
 
 }
 
@@ -119,11 +124,18 @@ export default {
   width: 80px;
   height: 36px;
   padding: 2px;
+  float: right;
+  vertical-align: middle;
+  margin: auto 15px auto auto;
 }
 
 .home-div {
-  height: 56px;
+  /*height: 56px;*/
+  flex: 1;
+  align-items: center;
   text-align: center;
+  font-size: 32px;
+  margin: auto;
 }
 
 .collapse-btn {
@@ -137,19 +149,16 @@ export default {
 }
 
 
-.home-header{
-  padding: 0;
-  margin: 0;
+.home-header {
   position: absolute;
   left: 0;
   top: 0;
   right: 0;
   height: 60px;
   background: #3e4653;
-
 }
 
-.home-nav{
+.home-nav {
   position: absolute;
   top: 60px;
   left: 0;
@@ -157,6 +166,9 @@ export default {
   bottom: 20px;
 }
 
+.home-aside {
+  background: #3e4653;
+}
 
 
 </style>
