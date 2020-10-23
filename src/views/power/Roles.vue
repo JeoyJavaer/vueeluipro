@@ -93,25 +93,20 @@
         width="50%"
         :before-close="handleAllocateClose">
 
-      <zk-table
+      <tree-table
           ref="table"
-          selection-type
+          :selection-type="true"
           :show-header="false"
           index-text="#"
           :data="allocateList"
           :props="treeProps"
-          tree-type
+          :tree-type="true"
           :columns="columns"
           :is-fold="false"
-          :expand-type="true"
+          :expand-type="false"
+          :border="false"
           >
-        <template slot="$expand" slot-scope="scope">
-          {{
-            `My name is ${scope.row.name},
-           this rowIndex is ${scope.rowIndex}.`
-          }}
-        </template>
-      </zk-table>
+      </tree-table>
 
       <span slot="footer" class="dialog-footer">
        <el-button @click="cancelAllocate">取 消</el-button>
@@ -156,20 +151,16 @@ export default {
       allocateList: [],
       treeProps: {
         label: 'authName',
-        children: 'children'
+        children: 'children',
+
       },
       columns: [
         {
           label: 'authName',
-          children: 'children'
+          prop:'authName',
+          headerAlign:'right',
+          width:'auto'
         },
-        {
-          label: 'authName',
-          children: 'children'
-        }, {
-          label: 'authName',
-          children: 'children'
-        }
 
       ],
 
