@@ -21,7 +21,7 @@
               :collapse="isCollapse"
               :collapse-transition="false"
               router
-              active-text-color="#0000ff">
+              active-text-color="#3F9DFE">
             <el-submenu :index="item.id+''" v-for="item in menuList" :key="item.id">
               <template slot="title">
                 <i :class="iconList[item.id]"></i>

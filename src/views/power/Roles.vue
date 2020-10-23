@@ -17,6 +17,7 @@
           :stripe="true"
           border
           class="roles-table"
+
           :data="roleList">
         <el-table-column
             type="expand">
@@ -96,15 +97,16 @@
           ref="table"
           sum-text="sum"
           index-text="#"
-
           :data="allocateList"
-          :prop="treeProps"
+          :props="treeProps"
           tree-type
+          :columns="columns"
           :is-fold="false"
           :expand-type="true"
           :selection-type="true">
         <template slot="$expand" slot-scope="scope">
-          {{ `My name is ${scope.row.name},
+          {{
+            `My name is ${scope.row.name},
            this rowIndex is ${scope.rowIndex}.`
           }}
         </template>
@@ -123,7 +125,7 @@
         :visible.sync="addDialogVisible"
         width="50%"
         :before-close="handleAddClose">
-      <el-form-item label="角色名称" prop="rightAdded">
+      <el-form-item label="角色名称" :prop="rightAdded">
         <el-input v-model="rightAdded.authName"></el-input>
       </el-form-item>
       <span slot="footer" class="dialog-footer">
@@ -144,19 +146,24 @@ export default {
       roleList: [],
       allocateDiaVisible: false,
       addDialogVisible: false,
-      rightAdded: {
-      },
+      rightAdded: {},
       role: {
         roleId: 0,
         rightId: 0
       },
 
-      allocateList:[],
-      treeProps:{
-        label:'authName',
-        children:children
+      allocateList: [],
+      treeProps: {
+        label: 'authName',
+        children: 'children'
       },
-      columns:[],
+      columns: [
+        {
+          label: 'authName',
+          children: 'children'
+        }
+
+      ],
 
     }
   },
@@ -183,8 +190,6 @@ export default {
       }
       this.allocateList = res.data
     },
-
-
 
 
     /*删除指定用户的各个权限*/
