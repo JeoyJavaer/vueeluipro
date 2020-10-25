@@ -1,4 +1,4 @@
-<template>
+<template xmlns="http://www.w3.org/1999/html">
   <el-card class="box-card">
     <div slot="header" class="clearfix">
       <el-breadcrumb separator-class="el-icon-arrow-right" class="user-breadcrumb">
@@ -87,6 +87,11 @@
                   type="danger"
                   @click="deleteClick(scope.$index, scope.row)">删除
               </el-button>
+              <el-button
+                  size="mini"
+                  type="warning"
+                  @click="allocateClick(scope.row)">分配角色
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -115,8 +120,27 @@
     </span>
     </el-dialog>
 
+    <el-dialog
+        title="提示"
+        :visible.sync="alloDialogVisible"
+        width="50%">
+      <div class="allo-roll-item" >当前用户:{{role.username}}</div><br>
+      <div class="allo-roll-item">当前角色:{{role.role_name}}</div><br>
+      <div class="allo-roll-item">分配角色:
+        <el-select  v-model="selectedRoleId" placeholder="请选择">
+          <el-option v-for="item in roleList" :key="item.id" :label="item.roleName" :value="item.id"></el-option>
+        </el-select>
+      </div>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="alloDialogCancel">取 消</el-button>
+    <el-button type="primary" @click="alloDialogSure">确 定</el-button>
+   </span>
+    </el-dialog>
+
 
   </el-card>
+
+
 </template>
 
 <script>
@@ -128,7 +152,8 @@ export default {
       pagenum: 1,
       pagesize: 2,
       addDialogVisible: false,
-      delDialogVisible:false,
+      delDialogVisible: false,
+      alloDialogVisible: false,
 
       userinfo: {
         id: '',
@@ -158,12 +183,17 @@ export default {
       },
       users: [],
       userItem: {},
-      totalItem: 0
+      totalItem: 0,
+      roleList: [],
+
+      role: {},
+      selectedRoleId:''
     }
   },
 
   created() {
     this.getUserList()
+    this.getRoleList()
   },
 
   methods: {
@@ -183,6 +213,14 @@ export default {
         this.pagenum = res.data.pagenum
 
       })
+    },
+
+    //分配权限时，需要展示的权限列表
+    async getRoleList() {
+      const res = await this.$axios.get('/roles')
+      if (res.meta.status === 200) {
+        this.roleList = res.data
+      }
     },
 
     addUserClick() {
@@ -253,6 +291,33 @@ export default {
       this.delDialogVisible = true;
       this.setUserInfo(data)
     },
+    allocateClick(row) {
+      // console.log(row);
+      this.role.userId=row.id;
+      this.role.username=row.username;
+      this.role.role_name=row.role_name;
+      this.alloDialogVisible = true
+    },
+    alloDialogCancel() {
+      this.alloDialogVisible = false
+    },
+
+   async alloDialogSure() {
+      //roleId 选中了某个角色
+     console.log(this.selectedRoleId);
+     if (this.selectedRoleId){
+        const  res=await this.$axios.put('/users/'+this.role.userId+'/role',{rid:this.selectedRoleId})
+        console.log(res);
+        if (res.meta.status===200){
+          this.$message.success(res.meta.msg)
+          this.alloDialogVisible=false
+        }else {
+          this.$message.error(res.meta.msg)
+        }
+      }else {
+       if (!this.selectValueRoleId) return this.$Message.error('选择要分配的角色')
+     }
+    },
 
     cleanUserInfo() {
       this.userinfo.username = ''
@@ -275,13 +340,13 @@ export default {
       this.cleanUserInfo()
     },
 
-    submitDelUser(){
-      this.$axios.delete('/users/'+this.userinfo.id).then((res)=>{
-        if (res.meta.status===200){
+    submitDelUser() {
+      this.$axios.delete('/users/' + this.userinfo.id).then((res) => {
+        if (res.meta.status === 200) {
           this.$message.success(res.meta.msg)
           this.getUserList()
-            this.delDialogVisible=false
-        }else {
+          this.delDialogVisible = false
+        } else {
           this.$message.error(res.meta.msg)
         }
       })
@@ -348,5 +413,9 @@ export default {
 
 .user-list-pagination {
   margin-top: 15px;
+}
+
+.allo-roll-item{
+  margin: 15px;
 }
 </style>
