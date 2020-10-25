@@ -365,13 +365,13 @@ export default {
     },
 
     handleSizeChange(pagesize) {//每页的数目发生变化
-      console.log(pagesize);
+
       this.pagesize = pagesize
       this.getUserList()
     },
 
     handleCurrentChange(pagenum) {// 当前第几页发生变化
-      console.log(pagenum);
+
       this.pagenum = pagenum
       this.getUserList()
     },

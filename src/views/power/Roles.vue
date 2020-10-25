@@ -78,8 +78,8 @@
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" icon="el-icon-edit" @click="editRoleClick(scope.row)" >编辑</el-button>
-            <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
+            <el-button size="mini" type="primary" icon="el-icon-edit" @click="editRoleClick(scope.row)">编辑</el-button>
+            <el-button size="mini" type="danger" icon="el-icon-delete" @click="deleteClick(scope.row)">删除</el-button>
             <el-button size="mini" type="warning" icon="el-icon-setting" @click="allocateClick(scope.row)">分配权限
             </el-button>
           </template>
@@ -313,12 +313,41 @@ export default {
 
     },
 
-    editRoleClick(row){
+
+    async doDelete(id) {
+      const res = await this.$axios.delete('/roles/' + id)
+      if (res.meta.status === 200) {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        });
+        await this.getRolesList()
+      }
+
+    },
+
+    async deleteClick(row) {
+      this.$confirm('此操作将永久删除该角色?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.doDelete(row.id)
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        });
+      });
+
+    },
+
+    editRoleClick(row) {
       console.log(row);
-      this.editRole.id=row.id
-      this.editRole.roleName=row.roleName
-      this.editRole.roleDesc=row.roleDesc
-      this.editDialogVisible=true
+      this.editRole.id = row.id
+      this.editRole.roleName = row.roleName
+      this.editRole.roleDesc = row.roleDesc
+      this.editDialogVisible = true
     },
     cancelEditDialog() {
       this.editRole = {}
@@ -329,7 +358,7 @@ export default {
       console.log(this.editRole);
       this.$refs.editRoleForm.validate((validate) => {
         if (validate) {
-          this.$axios.put('/roles/'+this.editRole.id, {
+          this.$axios.put('/roles/' + this.editRole.id, {
             'roleName': this.addedRole.roleName,
             'roleDes': this.addedRole.roleDesc
           }).then((res) => {
