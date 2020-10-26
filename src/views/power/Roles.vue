@@ -17,7 +17,6 @@
           :stripe="true"
           border
           class="roles-table"
-
           :data="roleList">
         <el-table-column
             type="expand">
@@ -27,7 +26,7 @@
             <el-row v-for="(item1,i1) in scope.row.children" :key="item1.id"
                     :class="['bdbottom', i1 === 0 ? 'bdtop' : '', 'vcenter']">
               <el-col :span="5">
-                <el-tag closable @close="handleClose(scope.row.id,item1.id)">{{ item1.authName }}</el-tag>
+                <el-tag closable @close="handleClose(scope.row,item1.id)">{{ item1.authName }}</el-tag>
                 <!--向右的箭头-->
                 <i class="el-icon-caret-right"></i>
               </el-col>
@@ -36,7 +35,7 @@
                 <el-row v-for="(item2,i2) in item1.children" :class="[i2 === 0 ? '' : 'bdtop', 'vcenter']"
                         :key="item2.id">
                   <el-col :span="5">
-                    <el-tag closable type="success" @close="handleClose(scope.row.id,item2.id)">{{
+                    <el-tag closable type="success" @close="handleClose(scope.row,item2.id)">{{
                         item2.authName
                       }}
                     </el-tag>
@@ -49,7 +48,7 @@
                             v-for="(item3,i3) in item2.children"
                             type="warning"
                             :key="item3.id"
-                            @close="handleClose(scope.row.id,item3.id)"
+                            @close="handleClose(scope.row,item3.id)"
                     >{{ item3.authName }}
                     </el-tag>
                   </el-col>
@@ -79,9 +78,10 @@
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" icon="el-icon-edit">编辑</el-button>
-            <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
-            <el-button size="mini" type="warning" icon="el-icon-setting" @click="allocateClick">分配权限</el-button>
+            <el-button size="mini" type="primary" icon="el-icon-edit" @click="editRoleClick(scope.row)">编辑</el-button>
+            <el-button size="mini" type="danger" icon="el-icon-delete" @click="deleteClick(scope.row)">删除</el-button>
+            <el-button size="mini" type="warning" icon="el-icon-setting" @click="allocateClick(scope.row)">分配权限
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -93,21 +93,15 @@
         width="50%"
         :before-close="handleAllocateClose">
 
-      <tree-table
-          ref="table"
-          :selection-type="true"
-          :show-header="false"
-          index-text="#"
+      <el-tree
+          ref="allocateRoleTable"
           :data="allocateList"
-          :props="treeProps"
-          :tree-type="true"
-          :columns="columns"
-          :is-fold="false"
-          :expand-type="false"
-          :border="false"
-          >
-      </tree-table>
-
+          show-checkbox
+          node-key="id"
+          default-expand-all
+          :default-checked-keys="defaultCheckedKeys"
+          :props="treeProps">
+      </el-tree>
       <span slot="footer" class="dialog-footer">
        <el-button @click="cancelAllocate">取 消</el-button>
        <el-button type="primary" @click="sureAllocate">确 定</el-button>
@@ -119,14 +113,37 @@
     <el-dialog
         title="添加角色"
         :visible.sync="addDialogVisible"
-        width="50%"
-        :before-close="handleAddClose">
-      <el-form-item label="角色名称" :prop="rightAdded">
-        <el-input v-model="rightAdded.authName"></el-input>
-      </el-form-item>
+        width="40%">
+      <el-form :model="addedRole" :rules="addRules" label-width="100px" ref="addRoleForm">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="addedRole.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="addedRole.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
-       <el-button @click="cancelAddDialog">取 消</el-button>
-       <el-button type="primary" @click="addDialogVisible = false">确 定</el-button>
+       <el-button @click="cancelAddDialog">取 消</el-button>       <el-button type="primary"
+                                                                            @click="confirmAddDialog">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <!--修改角色的弹窗-->
+    <el-dialog
+        title="修改角色"
+        :visible.sync="editDialogVisible"
+        width="40%">
+      <el-form :model="editRole" :rules="editRules" label-width="100px" ref="editRoleForm">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="editRole.roleName"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="editRole.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+       <el-button @click="cancelEditDialog">取 消</el-button>
+        <el-button type="primary" @click="confirmEditDialog">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -142,6 +159,7 @@ export default {
       roleList: [],
       allocateDiaVisible: false,
       addDialogVisible: false,
+      editDialogVisible: false,
       rightAdded: {},
       role: {
         roleId: 0,
@@ -150,25 +168,30 @@ export default {
 
       allocateList: [],
       treeProps: {
-        label: 'authName',
         children: 'children',
-
+        label: 'authName'
       },
-      columns: [
-        {
-          label: 'authName',
-          prop:'authName',
-          headerAlign:'right',
-          width:'auto'
-        },
-
-      ],
-
+      defaultCheckedKeys: [],
+      roleId: '',
+      addedRole: {},
+      addRules: {
+        roleName: [{required: true, message: '请输入角色名称', trigger: 'blur'},
+          {min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur'}],
+        roleDesc: [{required: true, message: '请输入角色描述', trigger: 'blur'},
+          {min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur'}]
+      },
+      editRole: {},
+      editRules: {
+        roleName: [{required: true, message: '请输入角色名称', trigger: 'blur'},
+          {min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur'}],
+        roleDesc: [{required: true, message: '请输入角色描述', trigger: 'blur'},
+          {min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur'}]
+      }
     }
   },
   created() {
     this.getRolesList()
-    this.getAllRightList()
+
   },
 
   methods: {
@@ -182,57 +205,175 @@ export default {
     },
 
     /*获取所有权限列表*/
-    async getAllRightList() {
+    async getAllRightList(role) {
       const res = await this.$axios.get('/rights/tree')
       if (res.meta.status !== 200) {
         this.$message.error(res.meta.msg)
       }
+
       this.allocateList = res.data
+
+      //遍历指定用户下的含有的权限
+      this.getLeafKeys(role, this.defaultCheckedKeys)
+      this.allocateDiaVisible = true
+    },
+
+    getLeafKeys(node, arr) {
+      if (!node.children) {
+        return arr.push(node.id)
+      }
+      node.children.forEach(item => this.getLeafKeys(item, arr))
     },
 
 
     /*删除指定用户的各个权限*/
-    async handleClose(roleId, rightId) {
-      this.role.roleId = roleId;
+    async handleClose(row, rightId) {
+      this.role.roleId = row.id;
       this.role.rightId = rightId
-      const res = await this.$axios.delete('/roles/' + roleId + '/rights/' + rightId)
+      const res = await this.$axios.delete('/roles/' + this.role.roleId + '/rights/' + rightId)
+      console.log(res);
       if (res.meta.status !== 200) {
         this.$message.error(res.meta.msg)
+        return
       }
-      this.roleList = res.data
+      this.$message.success(res.meta.msg)
+      row.children = res.data
 
     },
 
-    allocateClick() {
-      this.allocateDiaVisible = true
+    async getAllocatedByRoleId() {
+      const res = await this.$axios.get('/roles/' + this.role.roleId)
+      if (res.meta.status !== 200) {
+        this.$message.error(res.meta.msg)
+        return
+      }
+    },
+
+    allocateClick(role) {
+      this.roleId = role.id
+      this.getAllRightList(role)
+
     },
     /*分配权限关闭的操作*/
     handleAllocateClose() {
+      this.defaultCheckedKeys = []
       this.allocateDiaVisible = false
     },
     /*点击了取消分配权限的弹出*/
     cancelAllocate() {
+      this.defaultCheckedKeys = []
       this.allocateDiaVisible = false
     },
     /*点击了确定分配权限*/
-    sureAllocate() {
+    async sureAllocate() {
+      const keys = [
+        ...this.$refs.allocateRoleTable.getCheckedKeys(),
+        ...this.$refs.allocateRoleTable.getHalfCheckedKeys()]
+
+      let keyIds = keys.join(',');
+      console.log(keyIds);
+      const res = await this.$axios.post('/roles/' + this.roleId + '/rights', {rids: keyIds})
+      if (res.meta.status !== 200) {
+        this.$message.error(res.meta.msg)
+        return
+      }
+      this.$message.success(res.meta.msg)
+      this.defaultCheckedKeys = []
       this.allocateDiaVisible = false
+      this.getRolesList()
     },
 
 
     handAddBtn() {
       this.addDialogVisible = true
     },
-
-    handleAddClose() {
-
-    },
     cancelAddDialog() {
+      this.addedRole = {}
       this.addDialogVisible = false
     },
 
-    confirmAddDialog() {
-      this.addDialogVisible = false
+    async confirmAddDialog() {
+      this.$refs.addRoleForm.validate((validate) => {
+        if (validate) {
+          this.$axios.post('/roles', {
+            roleName: this.addedRole.roleName,
+            roleDes: this.addedRole.roleDesc
+          }).then((res) => {
+            console.log(res);
+            if (res.meta.status === 201) {
+              this.$message.success(res.meta.msg)
+              this.getRolesList()
+              this.cancelAddDialog()
+            } else {
+              this.$message.error(res.meta.msg)
+            }
+          })
+        }
+      })
+
+    },
+
+
+    async doDelete(id) {
+      const res = await this.$axios.delete('/roles/' + id)
+      if (res.meta.status === 200) {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        });
+        await this.getRolesList()
+      }
+
+    },
+
+    async deleteClick(row) {
+      this.$confirm('此操作将永久删除该角色?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.doDelete(row.id)
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        });
+      });
+
+    },
+
+    editRoleClick(row) {
+      console.log(row);
+      this.editRole.id = row.id
+      this.editRole.roleName = row.roleName
+      this.editRole.roleDesc = row.roleDesc
+      this.editDialogVisible = true
+    },
+    cancelEditDialog() {
+      this.editRole = {}
+      this.editDialogVisible = false
+    },
+
+    async confirmEditDialog() {
+      console.log(this.editRole);
+      this.$refs.editRoleForm.validate((validate) => {
+        if (validate) {
+          this.$axios.put('/roles/' + this.editRole.id, {
+            'roleName': this.addedRole.roleName,
+            'roleDes': this.addedRole.roleDesc
+          }).then((res) => {
+            console.log(res);
+            if (res.meta.status === 200) {
+              this.$message.success(res.meta.msg)
+              this.getRolesList()
+              this.cancelEditDialog()
+            } else {
+              this.$message.error(res.meta.msg)
+            }
+          })
+        }
+      })
+
     },
   }
 }

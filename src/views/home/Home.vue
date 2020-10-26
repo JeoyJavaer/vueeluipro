@@ -105,7 +105,7 @@ export default {
 .home {
   background: #55585e;
   /*height: 80%;*/
-
+  min-width: 1360px;
 }
 
 .el-menu {
@@ -163,7 +163,7 @@ export default {
   top: 60px;
   left: 0;
   right: 0;
-  bottom: 20px;
+  bottom: 0;
 }
 
 .home-aside {

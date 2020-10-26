@@ -52,4 +52,9 @@ a{
   float: right;
 }
 
+.el-table {
+  margin-top: 15px;
+  min-width: 1060px;
+}
+
 
