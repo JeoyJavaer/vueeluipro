@@ -56,9 +56,12 @@
               label="商品数量">
           </el-table-column>
           <el-table-column
-              width="120"
+              width="180"
               prop="add_time"
               label="创建时间">
+            <template slot-scope="scope">
+              {{scope.row.add_time | dataFormat}}
+            </template>
           </el-table-column>
 
           <el-table-column label="操作" width="150">
@@ -95,8 +98,11 @@
 </template>
 
 <script>
+import {myMixin} from '@/plugins/mix'
+
 export default {
   name: "Goods",
+  mixins:[myMixin],
   created() {
     this.getGoodsList()
   },
@@ -172,7 +178,7 @@ export default {
     },
 
     addGoodsClick(){
-
+      this.$router.push('/goods/add')
     }
 
 

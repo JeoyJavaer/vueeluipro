@@ -29,10 +29,13 @@
               </template>
               <el-menu-item @click="saveNavState('/'+subItem.path)" :index="'/'+subItem.path"
                             v-for="subItem in item.children" :key="subItem.id">
-                <!-- 导航开启路由模式：
-                将index值作为导航路由 -->
-                <!-- 二级菜单的模板区域 -->
-                {{ subItem.authName }}
+                <template slot="title">
+                  <!-- 导航开启路由模式：
+             将index值作为导航路由 -->
+                  <!-- 二级菜单的模板区域 -->
+                  <i class="el-icon-menu"></i>
+                  {{ subItem.authName }}
+                </template>
               </el-menu-item>
             </el-submenu>
           </el-menu>

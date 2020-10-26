@@ -31,6 +31,7 @@
             <el-tag v-if="scope.row.level==='0'" class="right-level">一级</el-tag>
             <el-tag v-else-if="scope.row.level==='1'" class="right-level" type="success">二级</el-tag>
             <el-tag v-else class="right-level" type="warning">三级</el-tag>
+
           </template>
         </el-table-column>
       </el-table>

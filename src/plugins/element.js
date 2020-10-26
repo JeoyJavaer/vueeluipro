@@ -1,33 +1,36 @@
 import Vue from 'vue'
 import {
-    Button,
-    Form,
-    FormItem,
-    Input,
-    Message,
-    Container,
-    Header,
-    Aside,
-    Footer,
-    Main,
-    Row,
-    Col,
-    Menu,
-    MenuItem,
-    Submenu,
-    Card,
-    Breadcrumb,
-    BreadcrumbItem,
-    Dialog,
-    Table,
-    TableColumn,
-    Switch,
-    Pagination,
-    Tag,
-    Tree,
-    Select,
-    Option,
-    MessageBox
+  Button,
+  Form,
+  FormItem,
+  Input,
+  Message,
+  Container,
+  Header,
+  Aside,
+  Footer,
+  Main,
+  Row,
+  Col,
+  Menu,
+  MenuItem,
+  Submenu,
+  Card,
+  Breadcrumb,
+  BreadcrumbItem,
+  Dialog,
+  Table,
+  TableColumn,
+  Switch,
+  Pagination,
+  Tag,
+  Tree,
+  Select,
+  Option,
+  MessageBox,
+  Steps,
+  Step,
+  Alert
 } from 'element-ui'
 
 Vue.use(Button)
@@ -56,6 +59,9 @@ Vue.use(Tag)
 Vue.use(Tree)
 Vue.use(Select)
 Vue.use(Option)
+Vue.use(Steps)
+Vue.use(Step)
+Vue.use(Alert)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
 
